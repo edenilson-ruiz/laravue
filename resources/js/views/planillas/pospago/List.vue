@@ -29,13 +29,13 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="PeriodoPago">
+      <el-table-column label="PeriodoPago" width="120">
         <template slot-scope="scope">
           <span>{{ scope.row.periodo_pago }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="Distribuidor" width="280">
+      <el-table-column label="Distribuidor">
         <template slot-scope="scope">
           <span>{{ scope.row.distribuidor }}</span>
         </template>
@@ -45,12 +45,14 @@
         prop="unidad_totales"
         label="TotalUnidades"
         align="right"
+        width="150"
       />
 
       <el-table-column
         prop="unidades_aplican"
         label="TotalAplican"
         align="right"
+        width="150"
       />
 
       <el-table-column
@@ -58,6 +60,7 @@
         label="Comision"
         align="right"
         :formatter="currency"
+        width="150"
       />
 
       <el-table-column class-name="status-col" label="Status" width="110">
@@ -68,11 +71,16 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="Actions" width="100">
+      <el-table-column align="center" label="Actions">
         <template slot-scope="scope">
-          <el-button type="primary" size="small" icon="el-icon-edit" @click="handleEditForm(scope.row.codigo_planilla, scope.row.distribuidor);">
-            Edit
-          </el-button>
+          <div>
+            <el-link rel="icon" :href="scope.row.url_file" icon="el-icon-download" target="_blank">
+              Download
+            </el-link>
+            <el-button type="primary" size="small" icon="el-icon-upload" @click="handleEditForm(scope.row.codigo_planilla, scope.row.distribuidor);">
+              Upload
+            </el-button>
+          </div>
         </template>
       </el-table-column>
 
@@ -116,7 +124,9 @@
               accept=" .pdf"
               @change="onFileChange"
             >
-            <label class="custom-file-label" for="inputFileUpload">Choose file</label>
+            <label class="el-button el-button--primary" for="inputFileUpload">
+              <i class="el-icon-upload" /> {{ showLabelInput }}
+            </label>
           </el-form-item>
 
         </el-form>
@@ -159,7 +169,7 @@ export default {
   data() {
     return {
       file: '',
-      filename: '',
+      filename: 'Seleccione un archivo pdf',
       success: '',
       list: [],
       showId: true,
@@ -172,7 +182,6 @@ export default {
       planillaFormVisible: false,
       currentPlanilla: [],
       formTitle: '',
-      urlPDF: '/upload/1-600004439-DEXC-20200609-11-12-10.pdf',
       query: {
         page: 1,
         limit: 10,
@@ -193,6 +202,9 @@ export default {
     imageUrl() {
       return this.value;
     },
+    showLabelInput() {
+      return this.filename;
+    },
   },
   created() {
     this.getList();
@@ -204,6 +216,7 @@ export default {
       // this.file = e.target.files[0];
       // this.file = file;
       this.file = e.target.files[0];
+      this.filename = 'Archivo seleccionado: ' + e.target.files[0].name;
     },
     async getList() {
       const { limit, page } = this.query;
@@ -290,6 +303,7 @@ export default {
     },
     handleEditForm(id) {
       this.formTitle = 'Subir PDF de CCF';
+      this.filename = 'Seleccione un archivo pdf';
       this.currentPlanilla = this.list.find(planilla => planilla.codigo_planilla === id);
       this.planillaFormVisible = true;
     },
@@ -350,3 +364,29 @@ export default {
   },
 };
 </script>
+<style>
+input[type='file']#inputFileUpload {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+ }
+ /*
+ label[for='inputFileUpload'] {
+  font-size: 12px;
+  font-weight: 600;
+  color: #FFFFFF;
+  background-color: #1890ff;
+  border-color: #1890ff;
+  display: inline-block;
+  transition: all .5s;
+  cursor: pointer;
+  padding: 5px 10px !important;
+  width: fit-content;
+  text-align: center;
+  border-radius: 5%;
+ }
+ */
+</style>

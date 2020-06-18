@@ -28,6 +28,7 @@ class PlanillaPospagoMasivoController extends Controller
             'PERIODO_PAGO as periodo_pago',
             'ACREEDOR_ID as acreedor_id',
             'DISTRIBUIDOR as distribuidor',
+            DB::raw("'/upload/' + URL_FILE as url_file"),
             DB::raw("CASE WHEN URL_FILE IS NOT NULL THEN 'presentada' ELSE 'pendiente' END status"),
             DB::raw('sum(UNIDAD_TOTALES) as unidad_totales'),
             DB::raw('sum(UNIDADES_APLICAN) as unidades_aplican'),

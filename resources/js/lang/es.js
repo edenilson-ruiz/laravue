@@ -1,6 +1,9 @@
 export default {
   route: {
     dashboard: 'Dashboard',
+    planillas: 'Planillas',
+    pospagoMasivo: 'Pospago Masivo',
+    multimediaMasivo: 'Multimedia Masivo',
     introduction: 'Introduction',
     documentation: 'Documentation',
     guide: 'Guide',

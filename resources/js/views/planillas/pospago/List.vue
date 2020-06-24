@@ -45,14 +45,14 @@
         prop="unidad_totales"
         label="TotalUnidades"
         align="right"
-        width="150"
+        width="130"
       />
 
       <el-table-column
         prop="unidades_aplican"
         label="TotalAplican"
         align="right"
-        width="150"
+        width="130"
       />
 
       <el-table-column
@@ -60,7 +60,7 @@
         label="Comision"
         align="right"
         :formatter="currency"
-        width="150"
+        width="130"
       />
 
       <el-table-column class-name="status-col" label="Status" width="110">
@@ -74,12 +74,14 @@
       <el-table-column align="center" label="Actions">
         <template slot-scope="scope">
           <div>
-            <el-link rel="icon" :href="scope.row.url_file" icon="el-icon-download" target="_blank">
-              Download
-            </el-link>
-            <el-button type="primary" size="small" icon="el-icon-upload" @click="handleEditForm(scope.row.codigo_planilla, scope.row.distribuidor);">
-              Upload
-            </el-button>
+            <el-tooltip class="item" effect="dark" content="Descargar CCF" placement="left">
+              <el-link :href="scope.row.url_file" target="_blank">
+                <el-button type="secondary" size="small" icon="el-icon-download" circle />
+              </el-link>
+            </el-tooltip>
+            <el-tooltip class="item" effect="dark" content="Cargar CCF" placement="right">
+              <el-button type="primary" size="small" icon="el-icon-upload2" circle @click="handleEditForm(scope.row.codigo_planilla, scope.row.distribuidor);" />
+            </el-tooltip>
           </div>
         </template>
       </el-table-column>

@@ -149,5 +149,5 @@ Route::apiResource('planillaPospagoMasivo', 'PlanillaPospagoMasivoController');
 Route::get('planillaPospagoMasivo', 'PlanillaPospagoMasivoController@index')->name('planillaPospagoMasivo.index');
 Route::post('store_file', 'PlanillaPospagoMasivoController@fileStore');
 
-
+Route::get('comisiones','PagoHistoricoController@index');
 //Route::apiResource('categories', 'CategoryController');

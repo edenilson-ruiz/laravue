@@ -2,10 +2,10 @@
   <div class="dashboard-editor-container">
     <github-corner style="position: absolute; top: 0px; border: 0; right: 0;" />
 
-    <panel-group @handleSetLineChartData="handleSetLineChartData" />
+    <panel-group :end-val="endVal" @handleSetLineChartData="handleSetLineChartData" />
 
     <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
-      <line-chart :chart-data="lineChartData" />
+      <line-chart v-if="dataloaded" :eje-x="ejeX" :chart-data="lineChartData" />
     </el-row>
 
     <el-row :gutter="32">
@@ -51,6 +51,8 @@ import TransactionTable from './components/TransactionTable';
 import TodoList from './components/TodoList';
 import BoxCard from './components/BoxCard';
 
+import axios from 'axios';
+
 const lineChartData = {
   newVisitis: {
     expectedData: [100, 120, 161, 134, 105, 160, 165],
@@ -70,6 +72,25 @@ const lineChartData = {
   },
 };
 
+// const respuesta = axios.get('/api/comisiones')
+//   .then(function(response) {
+//     // handle success
+//     const { data } = response;
+//     console.log(data);
+//     self.comisiones = data;
+//     self.ejeX = data.periodo_pago;
+//     self.endVal = parseFloat(data.comision_actual);
+//   })
+//   .catch(function(error) {
+//     // handle error
+//     console.log(error);
+//   })
+//   .then(function() {
+//     // always executed
+//   });
+
+// setTimeout(1, 5000);
+
 export default {
   name: 'DashboardAdmin',
   components: {
@@ -86,11 +107,41 @@ export default {
   data() {
     return {
       lineChartData: lineChartData.newVisitis,
+      comisiones: {},
+      ejeX: [1, 2, 3, 4, 5, 6],
+      endVal: 0,
+      dataloaded: false,
     };
+  },
+  created() {
+    this.getComisiones();
   },
   methods: {
     handleSetLineChartData(type) {
-      this.lineChartData = lineChartData[type];
+      // this.getComisiones();
+      this.lineChartData = this.comisiones[type];
+    },
+    async getComisiones() {
+      // Make a request for a user with a given ID
+      const self = this;
+      await axios.get('/api/comisiones')
+        .then(function(response) {
+          // handle success
+          const { data } = response;
+          console.log(data);
+          self.comisiones = data;
+          self.lineChartData = data.newVisitis;
+          self.ejeX = data.periodo_pago;
+          self.endVal = parseFloat(data.comision_actual);
+          self.dataloaded = true;
+        })
+        .catch(function(error) {
+          // handle error
+          console.log(error);
+        })
+        .then(function() {
+          // always executed
+        });
     },
   },
 };

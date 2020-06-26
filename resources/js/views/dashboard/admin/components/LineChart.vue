@@ -29,6 +29,12 @@ export default {
       type: Object,
       required: true,
     },
+    ejeX: {
+      type: Array,
+      default() {
+        return [1, 2, 3, 4, 5, 6];
+      },
+    },
   },
   data() {
     return {
@@ -81,7 +87,7 @@ export default {
     setOptions({ expectedData, actualData } = {}) {
       this.chart.setOption({
         xAxis: {
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          data: this.ejeX,
           boundaryGap: false,
           axisTick: {
             show: false,

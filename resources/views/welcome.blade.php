@@ -83,8 +83,6 @@
                 <div class="title m-b-md">
                     Laravel 
                 </div>
-                <b-alert show>Default Alert</b-alert>
-                <b-alert variant="success" show>Success Alert</b-alert>
                 
                 <div class="links">
                     <a href="https://laravel.com/docs">Docs</a>

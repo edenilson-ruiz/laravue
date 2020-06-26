@@ -1,8 +1,16 @@
 <template>
   <div class="dashboard-editor-container">
-    <github-corner style="position: absolute; top: 0px; border: 0; right: 0;" />
+    <!-- <github-corner style="position: absolute; top: 0px; border: 0; right: 0;" /> -->
 
-    <panel-group :end-val="endVal" @handleSetLineChartData="handleSetLineChartData" />
+    <panel-group
+      :comision-actual="comisionActual"
+      :comision-distri="comisionDistri"
+      :comision-corpo="comisionCorpo"
+      :comision-aliado="comisionAliado"
+      :comision-cadena="comisionCadena"
+      :comision-segmentada="comisionSegmentada"
+      @handleSetLineChartData="handleSetLineChartData"
+    />
 
     <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
       <line-chart v-if="dataloaded" :eje-x="ejeX" :chart-data="lineChartData" />
@@ -41,7 +49,7 @@
 </template>
 
 <script>
-import GithubCorner from '@/components/GithubCorner';
+// import GithubCorner from '@/components/GithubCorner';
 import PanelGroup from './components/PanelGroup';
 import LineChart from './components/LineChart';
 import RaddarChart from './components/RaddarChart';
@@ -94,7 +102,7 @@ const lineChartData = {
 export default {
   name: 'DashboardAdmin',
   components: {
-    GithubCorner,
+    // GithubCorner,
     PanelGroup,
     LineChart,
     RaddarChart,
@@ -110,6 +118,12 @@ export default {
       comisiones: {},
       ejeX: [1, 2, 3, 4, 5, 6],
       endVal: 0,
+      comisionActual: 0,
+      comisionDistri: 0,
+      comisionAliado: 0,
+      comisionCorpo: 0,
+      comisionCadena: 0,
+      comisionSegmentada: 0,
       dataloaded: false,
     };
   },
@@ -132,7 +146,12 @@ export default {
           self.comisiones = data;
           self.lineChartData = data.newVisitis;
           self.ejeX = data.periodo_pago;
-          self.endVal = parseFloat(data.comision_actual);
+          self.comisionActual = parseFloat(data.comision_actual);
+          self.comisionDistri = parseFloat(data.comision_distribuidores);
+          self.comisionCorpo = parseFloat(data.comision_corporativo);
+          self.comisionAliado = parseFloat(data.comision_aliados);
+          self.comisionCadena = parseFloat(data.comision_cadenas);
+          self.comisionSegmentada = parseFloat(data.comision_segmentada);
           self.dataloaded = true;
         })
         .catch(function(error) {

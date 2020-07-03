@@ -8,6 +8,10 @@
       <el-button v-waves :loading="downloading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
         {{ $t('table.export') }}
       </el-button>
+      <el-button v-waves :loading="downloading" class="filter-item" type="primary" icon="el-icon-download" @click="downloadPDF">
+        Download PDF
+      </el-button>
+      <el-checkbox v-model="checkAll" class="filter-item" :indeterminate="isIndeterminate" @change="handleCheckAllChange">Check all</el-checkbox>
     </div>
     <div v-if="success !== ''" class="alert alert-success" role="alert">
       {{ success }}
@@ -23,11 +27,21 @@
       show-summary
       :summary-method="getSummaries"
     >
-      <el-table-column v-if="showId" label="CodigoPlanilla" width="300">
+      <el-table-column v-if="showId" label="" width="80" align="center">
+        <template slot-scope="scope">
+          <el-checkbox-group v-model="checkedPlanillas" @change="handleCheckedCitiesChange">
+            <el-checkbox :key="scope.row.codigo_planilla" :label="scope.row.codigo_planilla" :disabled="scope.row.status === 'pendiente'">
+              {{ nothing }}
+            </el-checkbox>
+          </el-checkbox-group>
+        </template>
+      </el-table-column>
+
+      <!-- <el-table-column v-if="showId" label="CodigoPlanilla" width="300">
         <template slot-scope="scope">
           <span>{{ scope.row.codigo_planilla }}</span>
         </template>
-      </el-table-column>
+      </el-table-column> -->
 
       <el-table-column label="PeriodoPago" width="120">
         <template slot-scope="scope">
@@ -74,13 +88,13 @@
       <el-table-column align="center" label="Actions">
         <template slot-scope="scope">
           <div>
-            <el-tooltip class="item" effect="dark" content="Descargar CCF" placement="left">
+            <el-tooltip class="item" effect="dark" content="Ver CCF" placement="left">
               <el-link :href="scope.row.url_file" target="_blank">
-                <el-button type="secondary" size="small" icon="el-icon-download" circle />
+                <el-button type="primary" size="small" icon="el-icon-view" />
               </el-link>
             </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="Cargar CCF" placement="right">
-              <el-button type="primary" size="small" icon="el-icon-upload2" circle @click="handleEditForm(scope.row.codigo_planilla, scope.row.distribuidor);" />
+            <el-tooltip class="item" effect="dark" content="Cargar CCF" placement="top">
+              <el-button type="primary" size="small" icon="el-icon-upload" @click="handleEditForm(scope.row.codigo_planilla, scope.row.distribuidor);" />
             </el-tooltip>
           </div>
         </template>
@@ -102,19 +116,19 @@
         >
 
           <el-form-item label="ID" prop="codigo_planilla">
-            <el-input v-model="currentPlanilla.codigo_planilla" />
+            <el-input v-model="currentPlanilla.codigo_planilla" readonly="" />
           </el-form-item>
 
           <el-form-item label="Periodo Pago" prop="periodo_pago">
-            <el-input v-model="currentPlanilla.periodo_pago" />
+            <el-input v-model="currentPlanilla.periodo_pago" readonly="" />
           </el-form-item>
 
           <el-form-item label="Distribuidor" prop="distribuidor">
-            <el-input v-model="currentPlanilla.distribuidor" />
+            <el-input v-model="currentPlanilla.distribuidor" readonly="" />
           </el-form-item>
 
           <el-form-item label="Total Comision" prop="comision">
-            <el-input v-model="currentPlanilla.comision" value="currentPlanilla.comision | currency" />
+            <el-input v-model="currentPlanilla.comision" value="currentPlanilla.comision | currency" readonly="" />
           </el-form-item>
 
           <el-form-item label="CargarCCF">
@@ -124,6 +138,7 @@
               type="file"
               name="filename"
               accept=" .pdf"
+              required
               @change="onFileChange"
             >
             <label class="el-button el-button--primary" for="inputFileUpload">
@@ -174,6 +189,7 @@ export default {
       filename: 'Seleccione un archivo pdf',
       success: '',
       list: [],
+      nothing: '',
       showId: true,
       loading: true,
       downloading: false,
@@ -184,6 +200,10 @@ export default {
       planillaFormVisible: false,
       currentPlanilla: [],
       formTitle: '',
+      checkAll: false,
+      checkedPlanillas: [],
+      planillas: [],
+      isIndeterminate: true,
       query: {
         page: 1,
         limit: 10,
@@ -221,12 +241,16 @@ export default {
       this.filename = 'Archivo seleccionado: ' + e.target.files[0].name;
     },
     async getList() {
+      this.planillas = [];
       const { limit, page } = this.query;
       this.loading = true;
       const { data, meta } = await planillaPospagoMasivoResource.list(this.query);
       this.list = data;
       this.list.forEach((element, index) => {
         element['index'] = (page - 1) * limit + index + 1;
+        if (element.status === 'presentada') {
+          this.planillas.push(element.codigo_planilla);
+        }
       });
       this.total = meta.total;
       this.loading = false;
@@ -251,23 +275,27 @@ export default {
         formData.append('file', this.file);
         formData.append('planilla', JSON.stringify(this.currentPlanilla));
 
-        // send upload request
-        axios.post('/api/store_file', formData, config)
-          .then(response => {
-            this.$message({
-              type: 'success',
-              message: 'Planilla info has been updated successfully',
-              duration: 5 * 1000,
+        if (this.file === '') {
+          this.$message.warning(`Debe de seleccionar un archivo pdf para cargar`);
+        } else {
+          // send upload request
+          axios.post('/api/store_file', formData, config)
+            .then(response => {
+              this.$message({
+                type: 'success',
+                message: 'Planilla info has been updated successfully',
+                duration: 5 * 1000,
+              });
+              currentObj.success = response.data.success;
+              currentObj.filename = '';
+              this.getList();
+            })
+            .catch(error => {
+              currentObj.output = error;
+            }).finally(() => {
+              this.planillaFormVisible = false;
             });
-            currentObj.success = response.data.success;
-            currentObj.filename = '';
-            this.getList();
-          })
-          .catch(error => {
-            currentObj.output = error;
-          }).finally(() => {
-            this.planillaFormVisible = false;
-          });
+        }
       }
     },
     getSummaries(param) {
@@ -362,6 +390,38 @@ export default {
     },
     beforeRemove(file, fileList) {
       return this.$confirm(`Cancel the transfert of ${file.name} ?`);
+    },
+    handleCheckAllChange(val) {
+      this.checkedPlanillas = val ? this.planillas : [];
+      console.log(this.checkedPlanillas);
+      this.isIndeterminate = false;
+    },
+    handleCheckedCitiesChange(value) {
+      const checkedCount = value.length;
+      console.log(value);
+      this.checkAll = checkedCount === this.planillas.length;
+      this.isIndeterminate = checkedCount > 0 && checkedCount < this.planillas.length;
+    },
+    downloadPDF() {
+      const items = this.checkedPlanillas;
+      if (items.length === 0) {
+        this.$message.warning(`Seleccione al menos una planilla para descargar`);
+      } else {
+        // this.$message.info(`En proceso de descarga`);
+        items.forEach(element => {
+          const url = `/upload/${element}.pdf`;
+
+          axios.get(url, { responseType: 'blob' })
+            .then(response => {
+              const blob = new Blob([response.data], { type: 'application/pdf' });
+              const link = document.createElement('a');
+              link.href = URL.createObjectURL(blob);
+              link.download = `${element}.pdf`;
+              link.click();
+              URL.revokeObjectURL(link.href);
+            });
+        });
+      }
     },
   },
 };

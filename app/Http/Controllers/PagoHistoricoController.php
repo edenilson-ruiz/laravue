@@ -13,9 +13,10 @@ class PagoHistoricoController extends Controller
         $fecha_actual = date("d-m-Y");
 
         // resto 6 mes
-        $fecha_inicial = date("d-m-Y",strtotime($fecha_actual."- 5 month"));
-        $periodoIni = date("Ym", strtotime($fecha_inicial));
-        $periodoFin = date("Ym");
+        $fecha_ini = date("d-m-Y",strtotime($fecha_actual."- 6 month"));
+        $fecha_fin = date("d-m-Y",strtotime($fecha_actual."- 1 month"));
+        $periodoIni = date("Ym", strtotime($fecha_ini));
+        $periodoFin = date("Ym", strtotime($fecha_fin));
 
         // Se genera consulta por periodo, para el grafico con el historico de comision
         // por periodo de pago
